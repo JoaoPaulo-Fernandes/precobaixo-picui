@@ -197,6 +197,14 @@
     .cloud-product-admin h4, .cloud-market-editor h4 { grid-column: 1 / -1; margin: 0; font-size: 14px; }
     .cloud-result { grid-column: 1 / -1; min-height: 18px; margin: 0; color: var(--green-dark); font-size: 13px; }
     .cloud-result[data-state="error"] { color: #9c3e21; }
+    .analytics-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); grid-column: 1 / -1; gap: 10px; }
+    .analytics-stat { display: grid; gap: 4px; padding: 12px; border-radius: 9px; background: var(--page); }
+    .analytics-stat strong { color: var(--green-dark); font-size: 20px; }
+    .analytics-stat span { color: var(--muted); font-size: 12px; }
+    .analytics-rankings { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); grid-column: 1 / -1; gap: 12px; }
+    .analytics-rankings section { padding: 12px; border-radius: 9px; background: var(--page); }
+    .analytics-rankings h5 { margin: 0; font-size: 12px; }
+    .analytics-rankings ol { margin: 8px 0 0; padding-left: 20px; color: var(--muted); font-size: 12px; }
 
     .section-heading {
       display: flex;
@@ -446,6 +454,17 @@
             <div><h3>Gestão online</h3><p class="cloud-role" id="cloud-role"></p></div>
             <button class="cloud-button cloud-button-secondary" id="cloud-logout" type="button">Sair</button>
           </div>
+          <section class="cloud-market-editor" id="cloud-analytics-panel" hidden aria-labelledby="cloud-analytics-title">
+            <h4 id="cloud-analytics-title">Interações do site · últimos 30 dias</h4>
+            <p class="cloud-role" style="grid-column:1 / -1">Contagens agregadas de visitas, buscas e ações em produtos. Não são usuários únicos; nenhum IP, conta, identificador ou texto digitado nas buscas é armazenado.</p>
+            <button class="cloud-button cloud-button-secondary" id="refresh-analytics" type="button">Atualizar métricas</button>
+            <p class="cloud-result" id="analytics-status" role="status" aria-live="polite"></p>
+            <div class="analytics-summary" id="analytics-summary"></div>
+            <div class="analytics-rankings">
+              <section><h5>Produtos associados às buscas</h5><ol id="analytics-top-searches"></ol></section>
+              <section><h5>Produtos com mais ações</h5><ol id="analytics-top-products"></ol></section>
+            </div>
+          </section>
           <form class="cloud-market-editor" id="cloud-application-form" hidden>
             <h4>Solicitar acesso para um mercado</h4>
             <p class="cloud-role">O cadastro será analisado pelo administrador. A loja só poderá editar preços após a aprovação.</p>
@@ -604,6 +623,7 @@
     <div class="footer-inner">
       <span>PreçoBaixo Picuí · Uma iniciativa local para comprar melhor.</span>
       <span>Preços podem mudar. Confirme as informações no estabelecimento.</span>
+      <span>Métricas anônimas e agregadas: contamos visitas, buscas e interações sem armazenar dados de identificação ou o texto pesquisado.</span>
     </div>
   </footer>
 
@@ -671,6 +691,7 @@
     const cloudPendingApplications = document.querySelector("#cloud-pending-applications");
     const cloudProductForm = document.querySelector("#cloud-product-form");
     const cloudPriceForm = document.querySelector("#cloud-price-form");
+    const cloudAnalyticsPanel = document.querySelector("#cloud-analytics-panel");
     const cloudPasswordInput = document.querySelector("#cloud-password");
     const passwordVisibilityButton = document.querySelector("#toggle-password-visibility");
     let activeCategory = "Todas";
@@ -839,6 +860,84 @@
       element.dataset.state = isError ? "error" : "success";
     }
 
+    async function recordAnalyticsEvent(eventType, product = null) {
+      if (!cloudClient || cloudSession) return;
+      try {
+        const { error } = await cloudClient.rpc("record_site_analytics_event", {
+          p_event_type: eventType,
+          p_product_id: product?.id || null
+        });
+        if (error) throw error;
+      } catch (error) {
+        console.error("Não foi possível registrar a métrica anônima do PreçoBaixo Picuí.", error);
+      }
+    }
+
+    async function loadAnalyticsDashboard() {
+      setCloudResult("analytics-status", "Carregando métricas...");
+      const sinceDate = new Date();
+      sinceDate.setDate(sinceDate.getDate() - 29);
+      const since = `${sinceDate.getFullYear()}-${String(sinceDate.getMonth() + 1).padStart(2, "0")}-${String(sinceDate.getDate()).padStart(2, "0")}`;
+
+      try {
+        const { data, error } = await cloudClient.rpc("get_site_analytics_summary");
+        if (error) throw error;
+
+        const counts = (data || []).reduce((totals, row) => {
+          totals[row.event_type] = (totals[row.event_type] || 0) + Number(row.event_count);
+          return totals;
+        }, {});
+        const stats = [
+          ["Visitas", counts.visit || 0],
+          ["Buscas", counts.search || 0],
+          ["Buscas sem resultado", counts.search_no_results || 0],
+          ["Adições à cesta", counts.basket_add || 0],
+          ["Avisos de preço abertos", counts.price_report || 0]
+        ];
+        const summary = document.querySelector("#analytics-summary");
+        summary.replaceChildren(...stats.map(([label, count]) => {
+          const item = document.createElement("div");
+          item.className = "analytics-stat";
+          const value = document.createElement("strong");
+          value.textContent = Number(count).toLocaleString("pt-BR");
+          const description = document.createElement("span");
+          description.textContent = label;
+          item.append(value, description);
+          return item;
+        }));
+
+        const renderRanking = (elementId, eventTypes, emptyMessage) => {
+          const ranking = new Map();
+          (data || []).forEach((row) => {
+            if (!eventTypes.includes(row.event_type)) return;
+            ranking.set(row.product_name, (ranking.get(row.product_name) || 0) + Number(row.event_count));
+          });
+          const list = document.querySelector(`#${elementId}`);
+          const rankedProducts = [...ranking.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+          list.replaceChildren();
+          if (rankedProducts.length === 0) {
+            const emptyItem = document.createElement("li");
+            emptyItem.textContent = emptyMessage;
+            list.append(emptyItem);
+            return;
+          }
+          rankedProducts.forEach(([name, count]) => {
+            const item = document.createElement("li");
+            item.textContent = `${name}: ${Number(count).toLocaleString("pt-BR")}`;
+            list.append(item);
+          });
+        };
+        renderRanking("analytics-top-searches", ["search_product"], "Ainda não há buscas exatas por produto.");
+        renderRanking("analytics-top-products", ["basket_add", "price_report"], "Ainda não há ações em produtos.");
+        setCloudResult("analytics-status", `Dados agregados desde ${since.split("-").reverse().join("/")}.`);
+      } catch (error) {
+        console.error("Não foi possível carregar as métricas do site.", error);
+        setCloudResult("analytics-status", "Não foi possível carregar. Verifique se o arquivo supabase-site-analytics.sql foi executado no Supabase.", true);
+      }
+    }
+
     function loadSupabaseSdk() {
       if (window.supabase?.createClient) return Promise.resolve();
       return new Promise((resolve, reject) => {
@@ -966,6 +1065,7 @@
 
     async function handleCloudSession(session) {
       cloudSession = session;
+      cloudAnalyticsPanel.hidden = true;
       if (!session) {
         cloudMembership = null;
         cloudDashboard.hidden = true;
@@ -1036,6 +1136,8 @@
       cloudApplicationForm.hidden = true;
       cloudProductForm.hidden = membership.role !== "admin";
       cloudPriceForm.hidden = false;
+      cloudAnalyticsPanel.hidden = membership.role !== "admin";
+      if (membership.role === "admin") loadAnalyticsDashboard();
       await refreshRemoteCatalog();
 
       const marketSelectElement = document.querySelector("#cloud-price-market");
@@ -1091,6 +1193,7 @@
         const { data, error } = await cloudClient.auth.getSession();
         if (error) throw error;
         await handleCloudSession(data.session);
+        if (!data.session) recordAnalyticsEvent("visit");
       } catch (error) {
         console.error("Não foi possível iniciar a conexão online do PreçoBaixo Picuí.", error);
         setCloudStatus(`Falha na conexão: ${error.message || "verifique a URL, a chave pública e a configuração do Supabase."}`, true);
@@ -1261,6 +1364,7 @@
       const addButton = event.target.closest("[data-add-product]");
       if (addButton) {
         const product = products[Number(addButton.dataset.addProduct)];
+        recordAnalyticsEvent("basket_add", product);
         basket.set(product.name, (basket.get(product.name) || 0) + 1);
         renderBasket();
         renderProducts();
@@ -1271,11 +1375,12 @@
       if (reportButton) {
         const product = products[Number(reportButton.dataset.reportProduct)];
         const offer = product.offers[Number(reportButton.dataset.reportOffer)];
+        recordAnalyticsEvent("price_report", product);
         document.querySelector("#report-product").textContent =
           `${product.name} · ${product.unit} · ${offer.market} · ${formatPrice(offer.price)}`;
         document.querySelector("#report-description").textContent = offer.source === "Simulação"
-          ? "Este preço é fictício e faz parte da demonstração. Nenhum aviso foi enviado ou registrado."
-          : "Este protótipo ainda não envia avisos. Nenhum dado foi enviado ou registrado.";
+          ? "Este preço é fictício e faz parte da demonstração. Nenhum aviso foi enviado; a interação pode ser contabilizada anonimamente."
+          : "Este protótipo ainda não envia avisos. A interação pode ser contabilizada anonimamente, sem identificar você.";
         document.querySelector("#report-dialog").showModal();
       }
     });
@@ -1688,11 +1793,24 @@
     document.querySelector("#search-form").addEventListener("submit", (event) => {
       event.preventDefault();
       renderProducts();
+      const query = searchInput.value.trim().toLocaleLowerCase("pt-BR");
+      if (query) {
+        recordAnalyticsEvent("search");
+        const matchingProducts = products.filter((product) =>
+          (activeCategory === "Todas" || product.category === activeCategory)
+          && `${product.name} ${product.brand} ${product.category}`.toLocaleLowerCase("pt-BR").includes(query));
+        if (matchingProducts.length === 0) {
+          recordAnalyticsEvent("search_no_results");
+        } else if (matchingProducts.length === 1) {
+          recordAnalyticsEvent("search_product", matchingProducts[0]);
+        }
+      }
       document.querySelector("#products-section").scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
         block: "start"
       });
     });
+    document.querySelector("#refresh-analytics").addEventListener("click", loadAnalyticsDashboard);
     searchInput.addEventListener("input", renderProducts);
     sortSelect.addEventListener("change", renderProducts);
     document.querySelector("#filters").addEventListener("click", (event) => {
