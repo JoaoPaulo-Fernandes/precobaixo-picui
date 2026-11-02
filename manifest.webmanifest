@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "PreçoBaixo Picuí",
+  "short_name": "PreçoBaixo",
+  "description": "Compare preços de produtos de supermercado em Picuí.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f9f7",
+  "theme_color": "#176b45",
+  "icons": [
+    {
+      "src": "./icons/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

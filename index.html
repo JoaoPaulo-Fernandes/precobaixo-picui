@@ -1,0 +1,1726 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b45">
+  <meta name="description" content="Compare preços de produtos de supermercado em Picuí com o PreçoBaixo Picuí.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PreçoBaixo Picuí">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/app-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/app-icon.svg">
+  <title>PreçoBaixo Picuí — compare e economize</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --green: #176b45;
+      --green-dark: #105437;
+      --green-soft: #e9f4ed;
+      --ink: #17231d;
+      --muted: #66736b;
+      --line: #e5eae6;
+      --surface: #fff;
+      --page: #f7f9f7;
+      --orange: #e99a3b;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner, main, footer {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 14px;
+      background: var(--green);
+      color: white;
+      font-size: 23px;
+    }
+
+    .brand-name { font-size: 17px; font-weight: 800; letter-spacing: -.5px; }
+    .brand-place { color: var(--muted); font-size: 12px; }
+    .install-actions { display: flex; align-items: center; gap: 12px; }
+    .install-button { padding: 9px 13px; border: 0; border-radius: 9px; background: var(--green); color: white; font-weight: 700; }
+    .install-help { position: relative; color: var(--green-dark); font-size: 12px; }
+    .install-help summary { cursor: pointer; font-weight: 700; }
+    .install-help p { position: absolute; z-index: 2; right: 0; width: min(290px, 85vw); margin: 8px 0 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: white; box-shadow: 0 8px 24px rgb(16 35 25 / 12%); color: var(--ink); }
+
+    .location {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--green-dark);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .location-icon { display: block; width: 17px; height: 17px; flex: 0 0 auto; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin: 28px 0 24px;
+      padding: clamp(26px, 5vw, 54px);
+      border-radius: 24px;
+      background: var(--green);
+      color: white;
+    }
+
+    .hero::after {
+      position: absolute;
+      right: -54px;
+      bottom: -155px;
+      width: 340px;
+      height: 340px;
+      border: 1px solid rgb(255 255 255 / 13%);
+      border-radius: 50%;
+      box-shadow: 0 0 0 34px rgb(255 255 255 / 5%), 0 0 0 72px rgb(255 255 255 / 4%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .hero-copy { position: relative; z-index: 1; max-width: 660px; }
+    .eyebrow { margin: 0 0 10px; color: #cfe7d7; font-size: 13px; font-weight: 700; }
+    h1 { max-width: 620px; margin: 0; font-size: clamp(32px, 5vw, 52px); line-height: 1.08; letter-spacing: -1.7px; }
+    .hero p:not(.eyebrow) { max-width: 500px; margin: 15px 0 0; color: #e1f0e6; font-size: 16px; }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 620px;
+      margin-top: 25px;
+      padding: 7px;
+      border-radius: 13px;
+      background: white;
+      box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+    }
+
+    .search-icon { padding-left: 9px; color: #77837b; font-size: 19px; }
+    .search input { width: 100%; min-width: 0; padding: 10px 0; border: 0; outline: 0; color: var(--ink); }
+    .search input::placeholder { color: #859087; }
+    .search button, .clear-button {
+      border: 0;
+      border-radius: 9px;
+      background: var(--green);
+      color: white;
+      font-weight: 700;
+    }
+    .search button { padding: 11px 18px; }
+    .search button:hover { background: var(--green-dark); }
+
+    .demo-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 0 0 28px;
+      padding: 13px 15px;
+      border: 1px solid #dfe7e1;
+      border-radius: 12px;
+      background: #f1f5f2;
+      color: #4d5b52;
+      font-size: 13px;
+    }
+    .demo-note strong { color: var(--ink); }
+    .admin-panel { margin: 0 0 28px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+    .admin-panel summary { padding: 16px 18px; color: var(--green-dark); font-weight: 750; cursor: pointer; }
+    .admin-content { padding: 0 18px 18px; }
+    .admin-note { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+    .admin-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .admin-field { display: grid; gap: 5px; color: #48564d; font-size: 12px; font-weight: 700; }
+    .admin-field input, .admin-field select { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); font-weight: 400; }
+    .admin-field-full, .market-fields, .admin-actions, .admin-status { grid-column: 1 / -1; }
+    .market-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 13px; border: 1px solid var(--line); border-radius: 11px; }
+    .market-fields legend { padding: 0 5px; color: var(--ink); font-size: 13px; font-weight: 750; }
+    .admin-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .admin-save { padding: 10px 15px; border: 0; border-radius: 9px; background: var(--green); color: white; font-weight: 750; }
+    .admin-reset { padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: white; color: #48564d; font-weight: 650; }
+    .admin-status { min-height: 20px; margin: 0; color: var(--green-dark); font-size: 13px; }
+    .admin-status[data-state="error"] { color: #9c3e21; }
+    .cloud-panel { margin: 0 0 28px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+    .cloud-panel summary { padding: 16px 18px; color: var(--green-dark); font-weight: 750; cursor: pointer; }
+    .cloud-content { padding: 0 18px 18px; }
+    .cloud-status, .cloud-role { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+    .cloud-status[data-state="error"] { color: #9c3e21; }
+    [hidden] { display: none !important; }
+    .cloud-login-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .cloud-login-actions, .cloud-dashboard, .cloud-product-admin, .cloud-market-editor { grid-column: 1 / -1; }
+    .cloud-button { padding: 10px 14px; border: 0; border-radius: 9px; background: var(--green); color: white; font-weight: 750; }
+    .cloud-button-secondary { border: 1px solid var(--line); background: white; color: #48564d; }
+    .cloud-dashboard { display: grid; gap: 14px; padding-top: 6px; }
+    .cloud-dashboard-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .cloud-dashboard-header h3 { margin: 0; font-size: 16px; }
+    .cloud-product-admin, .cloud-market-editor { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 11px; }
+    .cloud-product-admin h4, .cloud-market-editor h4 { grid-column: 1 / -1; margin: 0; font-size: 14px; }
+    .cloud-result { grid-column: 1 / -1; min-height: 18px; margin: 0; color: var(--green-dark); font-size: 13px; }
+    .cloud-result[data-state="error"] { color: #9c3e21; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+    #products-section { scroll-margin-top: 18px; }
+    h2 { margin: 0; font-size: 22px; letter-spacing: -.5px; }
+    .subheading { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .sort-control { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+    .sort-control select {
+      max-width: 180px;
+      padding: 9px 30px 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: white;
+      color: var(--ink);
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin: 0 0 19px;
+      padding: 1px 0 5px;
+      scrollbar-width: thin;
+    }
+    .filter-chip {
+      flex: 0 0 auto;
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: white;
+      color: #48564d;
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .filter-chip[aria-pressed="true"] { border-color: var(--green); background: var(--green-soft); color: var(--green-dark); }
+
+    .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+    .product-card {
+      display: flex;
+      min-height: 225px;
+      flex-direction: column;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      transition: border-color .15s ease, transform .15s ease;
+    }
+    .product-card:hover { transform: translateY(-2px); border-color: #b7d5c2; }
+    .product-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .product-emoji {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 13px;
+      background: #f1f5f1;
+      font-size: 25px;
+    }
+    .category-label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .55px; }
+    .product-name { margin: 3px 0 0; font-size: 16px; line-height: 1.3; }
+    .unit { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .best-badge { padding: 5px 8px; border-radius: 999px; background: #eef1ef; color: #56625b; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .price-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 18px; }
+    .price { color: var(--ink); font-size: 25px; font-weight: 800; letter-spacing: -.8px; }
+    .market { color: var(--muted); font-size: 12px; text-align: right; }
+    .offer-heading { margin: 15px 0 5px; color: var(--muted); font-size: 11px; font-weight: 700; }
+    .offer-list { display: grid; gap: 5px; }
+    .offer-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 5px 10px; padding: 8px; border-radius: 7px; color: #48564d; font-size: 12px; }
+    .offer-item-best { background: #f1f4f2; color: var(--ink); font-weight: 750; }
+    .offer-price { white-space: nowrap; }
+    .offer-meta { grid-column: 1 / -1; color: var(--muted); font-size: 10px; font-weight: 400; }
+    .report-button { grid-column: 1 / -1; justify-self: start; padding: 0; border: 0; background: transparent; color: var(--green-dark); font-size: 11px; text-decoration: underline; }
+    .add-basket-button { width: 100%; margin-top: 12px; padding: 9px 12px; border: 1px solid var(--green); border-radius: 9px; background: white; color: var(--green-dark); font-size: 13px; font-weight: 750; }
+    .add-basket-button:hover { background: var(--green-soft); }
+
+    .basket-panel { margin: 0 0 30px; padding: 20px; border: 1px solid #cfe1d4; border-radius: 16px; background: #f1f8f3; }
+    .basket-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .basket-heading h2 { font-size: 20px; }
+    .basket-empty { margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+    .basket-items { display: grid; gap: 8px; margin: 15px 0; padding: 0; list-style: none; }
+    .basket-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: white; }
+    .basket-item-name { font-size: 13px; font-weight: 700; }
+    .basket-item-unit { margin-left: 5px; color: var(--muted); font-size: 11px; font-weight: 400; }
+    .basket-item-controls { display: flex; align-items: center; gap: 8px; }
+    .basket-quantity { width: 64px; padding: 6px; border: 1px solid var(--line); border-radius: 7px; }
+    .remove-basket-button, .clear-basket-button { border: 0; background: transparent; color: #59665d; font-size: 12px; text-decoration: underline; }
+    .basket-totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .basket-total { padding: 13px; border: 1px solid var(--line); border-radius: 11px; background: white; }
+    .basket-total-name { color: var(--muted); font-size: 12px; }
+    .basket-total-price { display: block; margin-top: 3px; color: var(--ink); font-size: 20px; font-weight: 800; }
+    .basket-total-note { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+    .basket-disclaimer { margin: 12px 0 0; color: var(--muted); font-size: 11px; }
+    .dialog-backdrop { border: 0; border-radius: 16px; padding: 0; box-shadow: 0 20px 70px rgb(0 0 0 / 25%); max-width: min(440px, calc(100% - 32px)); }
+    .dialog-backdrop::backdrop { background: rgb(16 35 25 / 48%); }
+    .dialog-content { padding: 23px; }
+    .dialog-content h2 { font-size: 20px; }
+    .dialog-content p { color: var(--muted); font-size: 14px; }
+    .dialog-product { padding: 10px; border-radius: 9px; background: var(--page); color: var(--ink) !important; }
+    .dialog-close { display: block; margin-left: auto; padding: 9px 13px; border: 0; border-radius: 8px; background: var(--green); color: white; font-weight: 700; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+    .card-footer { display: flex; justify-content: space-between; gap: 8px; margin-top: 9px; padding-top: 10px; border-top: 1px solid #eff2ef; color: var(--muted); font-size: 11px; }
+
+    .empty-state { grid-column: 1 / -1; padding: 40px 20px; border: 1px dashed #cbd6ce; border-radius: 16px; background: white; text-align: center; }
+    .empty-state h3 { margin: 0; font-size: 17px; }
+    .empty-state p { margin: 6px 0 15px; color: var(--muted); font-size: 14px; }
+    .clear-button { padding: 9px 14px; }
+
+    .how-it-works {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 46px 0;
+      padding: 23px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+    }
+    .step { display: flex; gap: 12px; }
+    .step-number { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border-radius: 10px; background: var(--green-soft); color: var(--green-dark); font-size: 13px; font-weight: 800; }
+    .step h3 { margin: 1px 0 3px; font-size: 14px; }
+    .step p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    footer { padding: 19px 0 28px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 15px; }
+
+    @media (max-width: 760px) {
+      .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .how-it-works { grid-template-columns: 1fr; gap: 18px; }
+    }
+    @media (max-width: 520px) {
+      .topbar-inner, main, footer { width: min(100% - 28px, 1120px); }
+      .topbar-inner { min-height: 66px; }
+      .location { display: none; }
+      .install-actions { gap: 8px; }
+      .install-help { font-size: 11px; }
+      .install-help summary { max-width: 90px; text-align: right; }
+      .install-button { padding: 8px 10px; font-size: 12px; }
+      .hero { margin-top: 18px; padding: 27px 21px; border-radius: 18px; }
+      .hero p:not(.eyebrow) { font-size: 14px; }
+      .search { gap: 6px; }
+      .search button { padding: 10px 12px; }
+      .section-heading { align-items: flex-start; flex-direction: column; }
+      .sort-control { width: 100%; justify-content: space-between; }
+      .sort-control select { flex: 1; }
+      .product-grid { grid-template-columns: 1fr; }
+      .product-card { min-height: 195px; }
+      .admin-form, .market-fields { grid-template-columns: 1fr; }
+      .cloud-login-form, .cloud-product-admin, .cloud-market-editor { grid-template-columns: 1fr; }
+      .cloud-dashboard-header { align-items: flex-start; flex-direction: column; }
+      .basket-panel { padding: 16px; }
+      .basket-totals { grid-template-columns: 1fr; }
+      .basket-item { align-items: flex-start; flex-direction: column; }
+      .basket-item-controls { width: 100%; }
+      .basket-quantity { margin-left: auto; }
+      .how-it-works { margin: 32px 0; padding: 19px; }
+      .footer-inner { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#" aria-label="PreçoBaixo Picuí, página inicial">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="28" height="28" focusable="false">
+            <g transform="rotate(90 16 16)">
+              <path d="M4 8A2 2 0 0 1 6 6H21L29 16 21 26H6A2 2 0 0 1 4 24V8Z" fill="white"/>
+              <circle cx="8" cy="16" r="1.5" fill="#176b45"/>
+              <text x="17" y="19" text-anchor="middle" fill="#176b45" font-size="7" font-weight="800" font-family="Arial, sans-serif" transform="rotate(-90 17 16)">R$</text>
+            </g>
+          </svg>
+        </span>
+        <span>
+          <span class="brand-name">PreçoBaixo</span><br>
+          <span class="brand-place">PICUÍ · PB</span>
+        </span>
+      </a>
+      <div class="location">
+        <svg class="location-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M19 10.2c0 5-7 11-7 11s-7-6-7-11a7 7 0 1 1 14 0Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Picuí, Paraíba</span>
+      </div>
+      <div class="install-actions">
+        <button class="install-button" id="install-app" type="button" hidden>Instalar app</button>
+        <details class="install-help">
+          <summary>Instalar no celular</summary>
+          <p>No Android, use “Instalar app” ou “Adicionar à tela inicial” no menu do navegador. No iPhone, toque em Compartilhar e escolha “Adicionar à Tela de Início”.</p>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow">COMPRAR BEM COMEÇA COM PESQUISA</p>
+        <h1 id="page-title">Compare preços. Economize em Picuí.</h1>
+        <p>Encontre os melhores preços dos produtos do dia a dia nos mercados da nossa cidade.</p>
+        <form class="search" id="search-form" role="search">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="search-input" type="search" placeholder="O que você está procurando?" aria-label="Buscar produto">
+          <button type="submit">Buscar</button>
+        </form>
+      </div>
+    </section>
+
+    <aside class="demo-note" aria-label="Aviso sobre dados de demonstração">
+      <span aria-hidden="true">ⓘ</span>
+      <span id="demo-note-text"><strong>Simulação, não são ofertas reais:</strong> produtos, nomes de mercados e todos os preços desta página são fictícios, apenas para demonstrar a comparação. Não representam estabelecimentos específicos de Picuí. Consulte os mercados para obter preços reais.</span>
+    </aside>
+
+    <details class="cloud-panel" id="cloud-panel">
+      <summary>Área online dos mercados</summary>
+      <div class="cloud-content">
+        <p class="cloud-status" id="cloud-status" role="status" aria-live="polite">Aguardando configuração do banco de dados online.</p>
+        <form class="cloud-login-form" id="cloud-login-form" hidden>
+          <label class="admin-field" for="cloud-email">E-mail do mercado<input id="cloud-email" type="email" autocomplete="username" required></label>
+          <label class="admin-field" for="cloud-password">Senha<input id="cloud-password" type="password" minlength="6" autocomplete="current-password" required></label>
+          <div class="cloud-login-actions">
+            <button class="cloud-button" type="submit">Entrar</button>
+            <button class="cloud-button cloud-button-secondary" id="cloud-create-account" type="button">Criar conta do mercado</button>
+          </div>
+        </form>
+        <div class="cloud-dashboard" id="cloud-dashboard" hidden>
+          <div class="cloud-dashboard-header">
+            <div><h3>Gestão online</h3><p class="cloud-role" id="cloud-role"></p></div>
+            <button class="cloud-button cloud-button-secondary" id="cloud-logout" type="button">Sair</button>
+          </div>
+          <form class="cloud-market-editor" id="cloud-application-form" hidden>
+            <h4>Solicitar acesso para um mercado</h4>
+            <p class="cloud-role">O cadastro será analisado pelo administrador. A loja só poderá editar preços após a aprovação.</p>
+            <label class="admin-field" for="application-market-name">Nome do mercado<input id="application-market-name" maxlength="80" required></label>
+            <label class="admin-field" for="application-contact-name">Nome do responsável<input id="application-contact-name" maxlength="80" required></label>
+            <label class="admin-field" for="application-phone">Telefone de contato (opcional)<input id="application-phone" type="tel" maxlength="30"></label>
+            <button class="cloud-button" type="submit">Enviar cadastro para aprovação</button>
+            <p class="cloud-result" id="cloud-application-result" role="status" aria-live="polite"></p>
+          </form>
+          <section class="cloud-market-editor" id="cloud-pending-applications" hidden aria-labelledby="pending-applications-title">
+            <h4 id="pending-applications-title">Cadastros aguardando aprovação</h4>
+            <div id="pending-applications-list"></div>
+            <p class="cloud-result" id="cloud-approval-result" role="status" aria-live="polite"></p>
+          </section>
+          <form class="cloud-product-admin" id="cloud-product-form" hidden>
+            <h4>Cadastrar produto no catálogo</h4>
+            <label class="admin-field" for="cloud-product-name">Produto<input id="cloud-product-name" maxlength="80" required></label>
+            <label class="admin-field" for="cloud-product-brand">Marca<input id="cloud-product-brand" maxlength="80"></label>
+            <label class="admin-field" for="cloud-product-unit">Embalagem ou unidade<input id="cloud-product-unit" maxlength="80" required></label>
+            <label class="admin-field" for="cloud-product-category">Categoria
+              <select id="cloud-product-category" required>
+                <option>Mercearia</option><option>Carnes e aves</option><option>Frios e laticínios</option><option>Limpeza</option><option>Higiene</option>
+              </select>
+            </label>
+            <button class="cloud-button" type="submit">Cadastrar produto</button>
+            <p class="cloud-result" id="cloud-product-result" role="status" aria-live="polite"></p>
+          </form>
+          <form class="cloud-market-editor" id="cloud-price-form">
+            <h4>Atualizar preço</h4>
+            <label class="admin-field" for="cloud-price-product">Produto
+              <select id="cloud-price-product" required></select>
+            </label>
+            <label class="admin-field" for="cloud-price-market">Mercado
+              <select id="cloud-price-market" required></select>
+            </label>
+            <label class="admin-field" for="cloud-price-value">Preço (R$)<input id="cloud-price-value" type="number" min="0.01" step="0.01" required></label>
+            <label class="admin-field" for="cloud-price-date">Data da consulta<input id="cloud-price-date" type="date" required></label>
+            <button class="cloud-button" type="submit">Salvar preço online</button>
+            <p class="cloud-result" id="cloud-price-result" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </details>
+
+    <details class="admin-panel" id="local-admin-panel">
+      <summary>Teste local de cadastro (somente neste navegador)</summary>
+      <div class="admin-content">
+        <p class="admin-note">Selecione um produto para atualizar ou escolha “Cadastrar novo produto”. Informe marca, embalagem, categoria, preço em cada mercado, data e origem. Alterar o nome de um mercado atualiza esse nome em todo o catálogo. Neste protótipo, os dados ficam salvos somente neste navegador e não são publicados para outras pessoas.</p>
+        <form class="admin-form" id="product-form">
+          <label class="admin-field admin-field-full" for="entry-product">
+            Produto
+            <select id="entry-product">
+              <option value="__new__">Cadastrar novo produto</option>
+            </select>
+          </label>
+          <label class="admin-field" for="entry-name">Nome do produto<input id="entry-name" required maxlength="80"></label>
+          <label class="admin-field" for="entry-brand">Marca<input id="entry-brand" maxlength="80" placeholder="Ex.: marca do produto"></label>
+          <label class="admin-field" for="entry-unit">Embalagem ou unidade<input id="entry-unit" required maxlength="80" placeholder="Ex.: pacote de 1 kg"></label>
+          <label class="admin-field" for="entry-category">
+            Categoria
+            <select id="entry-category" required>
+              <option>Mercearia</option>
+              <option>Carnes e aves</option>
+              <option>Frios e laticínios</option>
+              <option>Limpeza</option>
+              <option>Higiene</option>
+            </select>
+          </label>
+          <fieldset class="market-fields">
+            <legend>Mercados e preços (R$)</legend>
+            <label class="admin-field" for="market-name-0">Mercado 1<input id="market-name-0" required maxlength="60"></label>
+            <label class="admin-field" for="market-price-0">Preço<input id="market-price-0" type="number" min="0.01" step="0.01" required></label>
+            <label class="admin-field" for="market-name-1">Mercado 2<input id="market-name-1" required maxlength="60"></label>
+            <label class="admin-field" for="market-price-1">Preço<input id="market-price-1" type="number" min="0.01" step="0.01" required></label>
+            <label class="admin-field" for="market-name-2">Mercado 3<input id="market-name-2" required maxlength="60"></label>
+            <label class="admin-field" for="market-price-2">Preço<input id="market-price-2" type="number" min="0.01" step="0.01" required></label>
+          </fieldset>
+          <label class="admin-field" for="entry-date">Data da consulta<input id="entry-date" type="date" required></label>
+          <label class="admin-field" for="entry-source">
+            Origem dos preços
+            <select id="entry-source" required>
+              <option value="Informado pelo mercado">Informado pelo mercado</option>
+              <option value="Coleta presencial">Coleta presencial</option>
+              <option value="Enviado por usuário">Enviado por usuário</option>
+              <option value="Simulação">Simulação</option>
+            </select>
+          </label>
+          <div class="admin-actions">
+            <button class="admin-save" type="submit">Salvar produto e preços</button>
+            <button class="admin-reset" id="reset-demo" type="button">Restaurar dados de demonstração</button>
+          </div>
+          <p class="admin-status" id="admin-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </details>
+
+    <section class="basket-panel" aria-labelledby="basket-title">
+      <div class="basket-heading">
+        <div>
+          <h2 id="basket-title">Minha cesta</h2>
+          <p class="subheading" id="basket-count" aria-live="polite">Nenhum produto adicionado</p>
+        </div>
+        <button class="clear-basket-button" id="clear-basket" type="button" hidden>Limpar cesta</button>
+      </div>
+      <p class="basket-empty" id="basket-empty">Adicione produtos para comparar o total da sua compra nos três mercados.</p>
+      <ul class="basket-items" id="basket-items" hidden></ul>
+      <div class="basket-totals" id="basket-totals" hidden aria-live="polite"></div>
+      <p class="basket-disclaimer" id="basket-disclaimer" hidden>Totais estimados a partir dos preços exibidos. Confirme valores e disponibilidade com o mercado.</p>
+    </section>
+
+    <section id="products-section" aria-labelledby="products-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="products-title">Pesquise sua economia</h2>
+          <p class="subheading" id="result-count" aria-live="polite"></p>
+        </div>
+        <label class="sort-control" for="sort-select">
+          <span>Ordenar:</span>
+          <select id="sort-select">
+            <option value="savings">Maior economia</option>
+            <option value="price">Menor preço</option>
+            <option value="name">Nome do produto</option>
+          </select>
+        </label>
+      </div>
+
+      <nav class="filters" aria-label="Filtrar por categoria" id="filters">
+        <button class="filter-chip" type="button" data-category="Todas" aria-pressed="true">Todas</button>
+        <button class="filter-chip" type="button" data-category="Mercearia" aria-pressed="false">Mercearia</button>
+        <button class="filter-chip" type="button" data-category="Carnes e aves" aria-pressed="false">Carnes e aves</button>
+        <button class="filter-chip" type="button" data-category="Frios e laticínios" aria-pressed="false">Frios e laticínios</button>
+        <button class="filter-chip" type="button" data-category="Limpeza" aria-pressed="false">Limpeza</button>
+        <button class="filter-chip" type="button" data-category="Higiene" aria-pressed="false">Higiene</button>
+      </nav>
+
+      <div class="product-grid" id="product-grid"></div>
+    </section>
+
+    <section class="how-it-works" aria-label="Como funciona">
+      <article class="step">
+        <span class="step-number">1</span>
+        <div><h3>Procure um produto</h3><p>Encontre itens essenciais para sua lista de compras.</p></div>
+      </article>
+      <article class="step">
+        <span class="step-number">2</span>
+        <div><h3>Compare os mercados</h3><p>Veja preços e economias em um só lugar.</p></div>
+      </article>
+      <article class="step">
+        <span class="step-number">3</span>
+        <div><h3>Escolha onde comprar</h3><p>Confira a data do preço e confirme a oferta com o mercado.</p></div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span>PreçoBaixo Picuí · Uma iniciativa local para comprar melhor.</span>
+      <span>Preços podem mudar. Confirme as informações no estabelecimento.</span>
+    </div>
+  </footer>
+
+  <dialog class="dialog-backdrop" id="report-dialog" aria-labelledby="report-title">
+    <div class="dialog-content">
+      <h2 id="report-title">Avisar sobre um preço</h2>
+      <p class="dialog-product" id="report-product"></p>
+      <p id="report-description"></p>
+      <button class="dialog-close" id="close-report" type="button">Entendi</button>
+    </div>
+  </dialog>
+
+  <script>
+    // Configure with the project's URL and public anon/publishable key; never put a service_role key here.
+    const SUPABASE_URL = "https://ebfoxzxxeuxewyrxafrk.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_Cg3rtUQQxb47ikctb6nKFA_py6vTXh4";
+    const initialProducts = [
+      { name: "Café", unit: "pacote de 250 g", category: "Mercearia", emoji: "☕", offers: [{ market: "Mercado A", price: 15.49 }, { market: "Mercado B", price: 14.99 }, { market: "Mercado C", price: 15.79 }] },
+      { name: "Açúcar", unit: "pacote de 1 kg", category: "Mercearia", emoji: "🧂", offers: [{ market: "Mercado A", price: 4.99 }, { market: "Mercado B", price: 5.29 }, { market: "Mercado C", price: 4.79 }] },
+      { name: "Arroz", unit: "pacote de 1 kg", category: "Mercearia", emoji: "🍚", offers: [{ market: "Mercado A", price: 5.49 }, { market: "Mercado B", price: 5.99 }, { market: "Mercado C", price: 6.19 }] },
+      { name: "Feijão", unit: "pacote de 1 kg", category: "Mercearia", emoji: "🫘", offers: [{ market: "Mercado A", price: 8.49 }, { market: "Mercado B", price: 7.89 }, { market: "Mercado C", price: 8.19 }] },
+      { name: "Macarrão", unit: "pacote de 500 g", category: "Mercearia", emoji: "🍝", offers: [{ market: "Mercado A", price: 4.29 }, { market: "Mercado B", price: 3.99 }, { market: "Mercado C", price: 4.49 }] },
+      { name: "Óleo", unit: "garrafa de 900 ml", category: "Mercearia", emoji: "🫗", offers: [{ market: "Mercado A", price: 7.29 }, { market: "Mercado B", price: 6.99 }, { market: "Mercado C", price: 7.49 }] },
+      { name: "Margarina", unit: "pote de 250 g", category: "Frios e laticínios", emoji: "🧈", offers: [{ market: "Mercado A", price: 5.49 }, { market: "Mercado B", price: 5.99 }, { market: "Mercado C", price: 5.29 }] },
+      { name: "Farinha de trigo", unit: "pacote de 1 kg", category: "Mercearia", emoji: "🌾", offers: [{ market: "Mercado A", price: 5.29 }, { market: "Mercado B", price: 5.49 }, { market: "Mercado C", price: 4.99 }] },
+      { name: "Flocão de milho", unit: "pacote de 500 g", category: "Mercearia", emoji: "🌽", offers: [{ market: "Mercado A", price: 2.49 }, { market: "Mercado B", price: 2.29 }, { market: "Mercado C", price: 2.69 }] },
+      { name: "Leite em pó", unit: "pacote de 200 g", category: "Mercearia", emoji: "🥛", offers: [{ market: "Mercado A", price: 8.99 }, { market: "Mercado B", price: 9.49 }, { market: "Mercado C", price: 8.79 }] },
+      { name: "Sal", unit: "pacote de 1 kg", category: "Mercearia", emoji: "🧂", offers: [{ market: "Mercado A", price: 2.49 }, { market: "Mercado B", price: 2.69 }, { market: "Mercado C", price: 2.39 }] },
+      { name: "Molho de tomate", unit: "sachê de 300 g", category: "Mercearia", emoji: "🍅", offers: [{ market: "Mercado A", price: 2.49 }, { market: "Mercado B", price: 2.29 }, { market: "Mercado C", price: 2.69 }] },
+      { name: "Sabão em pó", unit: "pacote de 800 g", category: "Limpeza", emoji: "🫧", offers: [{ market: "Mercado A", price: 9.99 }, { market: "Mercado B", price: 10.49 }, { market: "Mercado C", price: 9.49 }] },
+      { name: "Sabão em barra", unit: "pacote com 5 unidades", category: "Limpeza", emoji: "🧼", offers: [{ market: "Mercado A", price: 9.49 }, { market: "Mercado B", price: 8.99 }, { market: "Mercado C", price: 9.79 }] },
+      { name: "Detergente", unit: "frasco de 500 ml", category: "Limpeza", emoji: "🧽", offers: [{ market: "Mercado A", price: 2.69 }, { market: "Mercado B", price: 2.49 }, { market: "Mercado C", price: 2.79 }] },
+      { name: "Desinfetante", unit: "frasco de 1 litro", category: "Limpeza", emoji: "🧴", offers: [{ market: "Mercado A", price: 5.49 }, { market: "Mercado B", price: 4.99 }, { market: "Mercado C", price: 5.79 }] },
+      { name: "Papel higiênico", unit: "pacote com 4 rolos", category: "Higiene", emoji: "🧻", offers: [{ market: "Mercado A", price: 6.99 }, { market: "Mercado B", price: 7.49 }, { market: "Mercado C", price: 6.79 }] },
+      { name: "Sabonete", unit: "unidade de 90 g", category: "Higiene", emoji: "🧼", offers: [{ market: "Mercado A", price: 2.49 }, { market: "Mercado B", price: 2.29 }, { market: "Mercado C", price: 2.69 }] },
+      { name: "Creme dental", unit: "tubo de 90 g", category: "Higiene", emoji: "🪥", offers: [{ market: "Mercado A", price: 4.99 }, { market: "Mercado B", price: 5.49 }, { market: "Mercado C", price: 4.79 }] },
+      { name: "Água sanitária", unit: "frasco de 1 litro", category: "Limpeza", emoji: "🧴", offers: [{ market: "Mercado A", price: 3.49 }, { market: "Mercado B", price: 3.29 }, { market: "Mercado C", price: 3.79 }] },
+      { name: "Amaciante", unit: "frasco de 1 litro", category: "Limpeza", emoji: "🧺", offers: [{ market: "Mercado A", price: 8.49 }, { market: "Mercado B", price: 7.99 }, { market: "Mercado C", price: 8.79 }] },
+      { name: "Carne bovina", unit: "quilo", category: "Carnes e aves", emoji: "🥩", offers: [{ market: "Mercado A", price: 39.90 }, { market: "Mercado B", price: 36.90 }, { market: "Mercado C", price: 41.90 }] },
+      { name: "Frango", unit: "quilo", category: "Carnes e aves", emoji: "🍗", offers: [{ market: "Mercado A", price: 12.99 }, { market: "Mercado B", price: 13.49 }, { market: "Mercado C", price: 11.99 }] },
+      { name: "Ovos", unit: "bandeja com 12", category: "Mercearia", emoji: "🥚", offers: [{ market: "Mercado A", price: 10.99 }, { market: "Mercado B", price: 11.49 }, { market: "Mercado C", price: 10.49 }] },
+      { name: "Sardinha", unit: "lata de 125 g", category: "Mercearia", emoji: "🐟", offers: [{ market: "Mercado A", price: 6.49 }, { market: "Mercado B", price: 5.99 }, { market: "Mercado C", price: 6.79 }] },
+      { name: "Queijo de coalho", unit: "quilo", category: "Frios e laticínios", emoji: "🧀", offers: [{ market: "Mercado A", price: 44.90 }, { market: "Mercado B", price: 42.90 }, { market: "Mercado C", price: 46.90 }] },
+      { name: "Queijo de manteiga", unit: "quilo", category: "Frios e laticínios", emoji: "🧀", offers: [{ market: "Mercado A", price: 49.90 }, { market: "Mercado B", price: 47.90 }, { market: "Mercado C", price: 52.90 }] }
+    ];
+
+    const storageKey = "precobaixo-picui-data-v1";
+    const initialMarketNames = ["Mercado A", "Mercado B", "Mercado C"];
+    const simulationDate = "2026-10-31";
+    let marketNames = [...initialMarketNames];
+    let products = createInitialProducts();
+
+    const grid = document.querySelector("#product-grid");
+    const searchInput = document.querySelector("#search-input");
+    const resultCount = document.querySelector("#result-count");
+    const sortSelect = document.querySelector("#sort-select");
+    const basket = new Map();
+    const productSelect = document.querySelector("#entry-product");
+    const entryForm = document.querySelector("#product-form");
+    const adminStatus = document.querySelector("#admin-status");
+    const cloudStatus = document.querySelector("#cloud-status");
+    const cloudLoginForm = document.querySelector("#cloud-login-form");
+    const cloudDashboard = document.querySelector("#cloud-dashboard");
+    const cloudApplicationForm = document.querySelector("#cloud-application-form");
+    const cloudPendingApplications = document.querySelector("#cloud-pending-applications");
+    const cloudProductForm = document.querySelector("#cloud-product-form");
+    const cloudPriceForm = document.querySelector("#cloud-price-form");
+    let activeCategory = "Todas";
+    let cloudClient = null;
+    let cloudSession = null;
+    let cloudMembership = null;
+    let remoteMarkets = [];
+    let remoteMode = false;
+
+    function createInitialProducts() {
+      return initialProducts.map((product) => ({
+        ...product,
+        brand: "Não informada",
+        offers: product.offers.map((offer) => ({
+          ...offer,
+          date: simulationDate,
+          source: "Simulação"
+        }))
+      }));
+    }
+
+    function formatPrice(value) {
+      return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function formatDate(value) {
+      const [year, month, day] = value.split("-");
+      return `${day}/${month}/${year}`;
+    }
+
+    function setAdminStatus(message, isError = false) {
+      adminStatus.textContent = message;
+      adminStatus.dataset.state = isError ? "error" : "success";
+    }
+
+    function getLocalDateInputValue() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function persistData(nextProducts, nextMarketNames) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          products: nextProducts,
+          marketNames: nextMarketNames
+        }));
+        return true;
+      } catch (error) {
+        console.error("Não foi possível salvar os dados do PreçoBaixo Picuí neste navegador.", error);
+        setAdminStatus("Não foi possível salvar neste navegador. Verifique o espaço disponível e as permissões de armazenamento.", true);
+        return false;
+      }
+    }
+
+    function loadSavedData() {
+      let savedData;
+      try {
+        const serializedData = localStorage.getItem(storageKey);
+        if (!serializedData) return;
+        savedData = JSON.parse(serializedData);
+      } catch (error) {
+        console.error("Não foi possível carregar os dados salvos do PreçoBaixo Picuí.", error);
+        setAdminStatus("Os dados salvos não puderam ser lidos. A demonstração original continua carregada.", true);
+        return;
+      }
+
+      const validMarkets = savedData
+        && typeof savedData === "object"
+        && Array.isArray(savedData.marketNames)
+        && savedData.marketNames.length === 3
+        && savedData.marketNames.every((name) => typeof name === "string" && name.trim())
+        && new Set(savedData.marketNames.map((name) => name.trim().toLocaleLowerCase("pt-BR"))).size === 3;
+      const validProducts = savedData
+        && Array.isArray(savedData.products)
+        && savedData.products.every((product) =>
+          typeof product.name === "string"
+          && typeof product.unit === "string"
+          && typeof product.category === "string"
+          && ["Mercearia", "Carnes e aves", "Frios e laticínios", "Limpeza", "Higiene"].includes(product.category)
+          && typeof product.brand === "string"
+          && typeof product.emoji === "string"
+          && Array.isArray(product.offers)
+          && product.offers.length === 3
+          && product.offers.every((offer) =>
+            typeof offer.market === "string"
+            && Number.isFinite(offer.price)
+            && offer.price > 0
+            && typeof offer.date === "string"
+            && /^\d{4}-\d{2}-\d{2}$/.test(offer.date)
+            && ["Informado pelo mercado", "Coleta presencial", "Enviado por usuário", "Simulação"].includes(offer.source)));
+
+      if (!validMarkets || !validProducts) {
+        setAdminStatus("Os dados salvos estão incompletos ou inválidos. A demonstração original continua carregada.", true);
+        return;
+      }
+
+      marketNames = savedData.marketNames.map((name) => name.trim());
+      products = savedData.products;
+    }
+
+    function renderProductOptions(selectedValue = productSelect.value) {
+      productSelect.innerHTML = `
+        <option value="__new__">Cadastrar novo produto</option>
+        ${products.map((product, index) => `<option value="${index}">${escapeHTML(product.name)}</option>`).join("")}`;
+      if ([...productSelect.options].some((option) => option.value === selectedValue)) {
+        productSelect.value = selectedValue;
+      } else {
+        productSelect.value = "__new__";
+      }
+    }
+
+    function loadProductIntoForm() {
+      const isNewProduct = productSelect.value === "__new__";
+      const product = isNewProduct ? null : products[Number(productSelect.value)];
+      document.querySelector("#entry-name").value = product?.name || "";
+      document.querySelector("#entry-brand").value = product?.brand === "Não informada" ? "" : (product?.brand || "");
+      document.querySelector("#entry-unit").value = product?.unit || "";
+      document.querySelector("#entry-category").value = product?.category || "Mercearia";
+      document.querySelector("#entry-date").value = product?.offers[0].date || getLocalDateInputValue();
+      document.querySelector("#entry-source").value = product?.offers[0].source || "Informado pelo mercado";
+
+      marketNames.forEach((market, index) => {
+        document.querySelector(`#market-name-${index}`).value = market;
+        const offer = product?.offers[index];
+        document.querySelector(`#market-price-${index}`).value = offer ? offer.price.toFixed(2) : "";
+      });
+    }
+
+    function updateDisclosure() {
+      const offers = products.flatMap((product) => product.offers);
+      if (remoteMode && offers.length === 0) {
+        document.querySelector("#demo-note-text").innerHTML =
+          "<strong>Catálogo online:</strong> os produtos aparecem à medida que forem cadastrados e os mercados informarem preços. Confirme valores e disponibilidade diretamente com o estabelecimento.";
+        return;
+      }
+
+      const allSimulated = offers.length > 0 && offers.every((offer) => offer.source === "Simulação");
+      document.querySelector("#demo-note-text").innerHTML = allSimulated
+        ? "<strong>Simulação, não são ofertas reais:</strong> produtos, nomes de mercados e todos os preços desta página são fictícios, apenas para demonstrar a comparação. Não representam estabelecimentos específicos de Picuí. Consulte os mercados para obter preços reais."
+        : remoteMode
+          ? "<strong>Preços informativos:</strong> consulte a origem e a data de cada valor; confirme preço e disponibilidade diretamente com o mercado."
+          : "<strong>Dados ainda locais:</strong> os registros inseridos neste protótipo ficam apenas neste navegador e não são publicados para outros visitantes. Confira origem e data antes de usar os preços.";
+    }
+
+    function setCloudStatus(message, isError = false) {
+      cloudStatus.textContent = message;
+      cloudStatus.dataset.state = isError ? "error" : "success";
+    }
+
+    function setCloudResult(elementId, message, isError = false) {
+      const element = document.querySelector(`#${elementId}`);
+      element.textContent = message;
+      element.dataset.state = isError ? "error" : "success";
+    }
+
+    function loadSupabaseSdk() {
+      if (window.supabase?.createClient) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js";
+        script.onload = () => window.supabase?.createClient
+          ? resolve()
+          : reject(new Error("a biblioteca carregou, mas o cliente não ficou disponível"));
+        script.onerror = () => reject(new Error("não foi possível carregar a biblioteca do Supabase"));
+        document.head.appendChild(script);
+      });
+    }
+
+    function isCloudConfigured() {
+      return SUPABASE_URL.startsWith("https://")
+        && Boolean(SUPABASE_ANON_KEY)
+        && !SUPABASE_ANON_KEY.includes("COLE_");
+    }
+
+    async function loadRemoteCatalog() {
+      const [marketResult, productResult, priceResult] = await Promise.all([
+        cloudClient.from("markets").select("id,name").eq("active", true).order("name"),
+        cloudClient.from("products").select("id,name,brand,unit,category,emoji").eq("active", true).order("name"),
+        cloudClient.from("prices").select("id,product_id,market_id,price,observed_on,source")
+      ]);
+      const queryError = marketResult.error || productResult.error || priceResult.error;
+      if (queryError) throw queryError;
+
+      remoteMarkets = marketResult.data || [];
+      marketNames = remoteMarkets.map((market) => market.name);
+      products = (productResult.data || []).map((product) => ({
+        ...product,
+        brand: product.brand || "Não informada",
+        emoji: product.emoji || "🛒",
+        offers: (priceResult.data || [])
+          .filter((price) => price.product_id === product.id)
+          .map((price) => ({
+            id: price.id,
+            market: remoteMarkets.find((market) => market.id === price.market_id)?.name || "Mercado",
+            marketId: price.market_id,
+            price: Number(price.price),
+            date: price.observed_on,
+            source: price.source
+          }))
+      }));
+
+      updateDisclosure();
+      renderBasket();
+      renderProducts();
+      renderRemoteEditorOptions();
+    }
+
+    async function refreshRemoteCatalog() {
+      try {
+        await loadRemoteCatalog();
+        setCloudStatus("Catálogo conectado e atualizado com dados online.");
+        return true;
+      } catch (error) {
+        console.error("Não foi possível carregar o catálogo online do PreçoBaixo Picuí.", error);
+        setCloudStatus(`Falha ao carregar o catálogo: ${error.message || "verifique a conexão e as políticas do banco."}`, true);
+        return false;
+      }
+    }
+
+    async function loadPendingApplications() {
+      const { data, error } = await cloudClient
+        .from("market_applications")
+        .select("id,contact_email,market_name,contact_name,contact_phone,created_at")
+        .eq("status", "pending")
+        .order("created_at");
+      if (error) throw error;
+
+      const container = document.querySelector("#pending-applications-list");
+      if (!data.length) {
+        container.textContent = "Nenhum cadastro aguardando aprovação.";
+        return;
+      }
+
+      container.innerHTML = data.map((application) => `
+        <article class="basket-item">
+          <div>
+            <strong>${escapeHTML(application.market_name)}</strong>
+            <div class="subheading">Responsável: ${escapeHTML(application.contact_name)} · ${escapeHTML(application.contact_phone || "telefone não informado")}</div>
+            <div class="subheading">Conta: ${escapeHTML(application.contact_email)}</div>
+          </div>
+          <div class="admin-actions">
+            <button class="cloud-button" type="button" data-approve-application="${escapeHTML(application.id)}">Aprovar</button>
+            <button class="admin-reset" type="button" data-reject-application="${escapeHTML(application.id)}">Rejeitar</button>
+          </div>
+        </article>`).join("");
+    }
+
+    function renderRemoteEditorOptions() {
+      const productSelectElement = document.querySelector("#cloud-price-product");
+      const marketSelectElement = document.querySelector("#cloud-price-market");
+      const selectedProductId = productSelectElement.value;
+      const selectedMarketId = marketSelectElement.value;
+
+      productSelectElement.innerHTML = products
+        .map((product) => `<option value="${escapeHTML(product.id)}">${escapeHTML(product.name)} · ${escapeHTML(product.brand)} · ${escapeHTML(product.unit)}</option>`)
+        .join("");
+      marketSelectElement.innerHTML = remoteMarkets
+        .map((market) => `<option value="${escapeHTML(market.id)}">${escapeHTML(market.name)}</option>`)
+        .join("");
+
+      if (products.some((product) => product.id === selectedProductId)) {
+        productSelectElement.value = selectedProductId;
+      }
+      if (remoteMarkets.some((market) => market.id === selectedMarketId)) {
+        marketSelectElement.value = selectedMarketId;
+      }
+      loadRemotePriceIntoForm();
+    }
+
+    function loadRemotePriceIntoForm() {
+      if (!cloudMembership) return;
+      const product = products.find((item) => item.id === document.querySelector("#cloud-price-product").value);
+      const marketId = cloudMembership.role === "admin"
+        ? document.querySelector("#cloud-price-market").value
+        : cloudMembership.market_id;
+      const offer = product?.offers.find((item) => item.marketId === marketId);
+      document.querySelector("#cloud-price-value").value = offer ? offer.price.toFixed(2) : "";
+      document.querySelector("#cloud-price-date").value = offer?.date || getLocalDateInputValue();
+    }
+
+    async function handleCloudSession(session) {
+      cloudSession = session;
+      if (!session) {
+        cloudMembership = null;
+        cloudDashboard.hidden = true;
+        cloudApplicationForm.hidden = true;
+        cloudPendingApplications.hidden = true;
+        cloudProductForm.hidden = true;
+        cloudPriceForm.hidden = true;
+        cloudLoginForm.hidden = false;
+        setCloudStatus("Entre com as credenciais fornecidas para o seu mercado.");
+        await refreshRemoteCatalog();
+        return;
+      }
+
+      cloudLoginForm.hidden = true;
+      cloudDashboard.hidden = false;
+      document.querySelector("#cloud-role").textContent = `Conectado como ${session.user.email || "usuário autenticado"}.`;
+
+      const { data: membership, error } = await cloudClient
+        .from("market_members")
+        .select("role,market_id")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      if (error) {
+        cloudMembership = null;
+        cloudApplicationForm.hidden = true;
+        cloudPendingApplications.hidden = true;
+        cloudProductForm.hidden = true;
+        cloudPriceForm.hidden = true;
+        setCloudStatus(`Não foi possível verificar o acesso: ${error.message}`, true);
+        return;
+      }
+
+      if (!membership || !["admin", "market"].includes(membership.role)) {
+        cloudMembership = null;
+        cloudProductForm.hidden = true;
+        cloudPriceForm.hidden = true;
+        cloudPendingApplications.hidden = true;
+        cloudApplicationForm.hidden = false;
+        document.querySelector("#cloud-role").textContent = "Esta conta ainda não está vinculada a um mercado.";
+        const { data: applications, error: applicationError } = await cloudClient
+          .from("market_applications")
+          .select("status")
+          .eq("applicant_user_id", session.user.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (applicationError) {
+          setCloudStatus(`Não foi possível consultar o cadastro: ${applicationError.message}`, true);
+          return;
+        }
+        const latestApplication = applications[0];
+        document.querySelector("#cloud-application-result").textContent =
+          latestApplication?.status === "pending"
+            ? "Cadastro recebido. Aguarde a aprovação do administrador."
+            : latestApplication?.status === "rejected"
+              ? "O cadastro anterior foi rejeitado. Você pode enviar uma nova solicitação."
+              : "";
+        document.querySelector("#cloud-application-result").dataset.state =
+          latestApplication?.status === "rejected" ? "error" : "success";
+        await refreshRemoteCatalog();
+        setCloudStatus(latestApplication?.status === "pending"
+          ? "Cadastro aguardando aprovação. Você não pode alterar preços ainda."
+          : "Envie a solicitação do mercado para o administrador aprovar.");
+        return;
+      }
+
+      cloudMembership = membership;
+      cloudApplicationForm.hidden = true;
+      cloudProductForm.hidden = membership.role !== "admin";
+      cloudPriceForm.hidden = false;
+      await refreshRemoteCatalog();
+
+      const marketSelectElement = document.querySelector("#cloud-price-market");
+      if (membership.role === "market") {
+        cloudPendingApplications.hidden = true;
+        const ownMarket = remoteMarkets.find((market) => market.id === membership.market_id);
+        if (!ownMarket) {
+          cloudPriceForm.hidden = true;
+          setCloudStatus("O mercado vinculado à conta está inativo ou não existe.", true);
+          return;
+        }
+        marketSelectElement.value = ownMarket.id;
+        marketSelectElement.disabled = true;
+        document.querySelector("#cloud-role").textContent = `Conta do mercado: ${ownMarket.name}. Você só pode alterar os preços desta loja.`;
+      } else {
+        marketSelectElement.disabled = false;
+        document.querySelector("#cloud-role").textContent = `Administrador · ${session.user.email || "conta autenticada"}`;
+        cloudPendingApplications.hidden = false;
+        try {
+          await loadPendingApplications();
+        } catch (pendingError) {
+          console.error("Não foi possível carregar as solicitações de mercado.", pendingError);
+          setCloudStatus(`Não foi possível carregar os cadastros pendentes: ${pendingError.message || "verifique a política de acesso."}`, true);
+        }
+      }
+      loadRemotePriceIntoForm();
+    }
+
+    async function initializeCloud() {
+      if (!isCloudConfigured()) {
+        cloudLoginForm.hidden = true;
+        setCloudStatus("Ainda não configurado. Preencha a URL e a chave pública do Supabase no início do código e aplique supabase-schema.sql ao projeto.");
+        return;
+      }
+
+      remoteMode = true;
+      document.querySelector("#local-admin-panel").hidden = true;
+      document.querySelector("#cloud-panel").open = true;
+      try {
+        await loadSupabaseSdk();
+        cloudClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        cloudLoginForm.hidden = false;
+        cloudClient.auth.onAuthStateChange((_event, session) => {
+          window.setTimeout(() => {
+            handleCloudSession(session).catch((error) => {
+              console.error("Não foi possível verificar a sessão do mercado.", error);
+              setCloudStatus(`Erro ao verificar a conta: ${error.message || "tente novamente."}`, true);
+            });
+          }, 0);
+        });
+
+        await refreshRemoteCatalog();
+        const { data, error } = await cloudClient.auth.getSession();
+        if (error) throw error;
+        await handleCloudSession(data.session);
+      } catch (error) {
+        console.error("Não foi possível iniciar a conexão online do PreçoBaixo Picuí.", error);
+        setCloudStatus(`Falha na conexão: ${error.message || "verifique a URL, a chave pública e a configuração do Supabase."}`, true);
+      }
+    }
+
+    function getPriceRange(product) {
+      const sortedOffers = product.offers
+        .map((offer, originalIndex) => ({ ...offer, originalIndex }))
+        .sort((a, b) => a.price - b.price);
+      if (sortedOffers.length === 0) return { cheapest: null, difference: 0 };
+      return {
+        cheapest: sortedOffers[0],
+        difference: sortedOffers[sortedOffers.length - 1].price - sortedOffers[0].price
+      };
+    }
+
+    function renderBasket() {
+      const basketItems = document.querySelector("#basket-items");
+      const basketTotals = document.querySelector("#basket-totals");
+      const basketEmpty = document.querySelector("#basket-empty");
+      const basketDisclaimer = document.querySelector("#basket-disclaimer");
+      const clearBasketButton = document.querySelector("#clear-basket");
+      const entries = [...basket.entries()];
+      const itemCount = entries.reduce((total, [, quantity]) => total + quantity, 0);
+
+      document.querySelector("#basket-count").textContent = itemCount
+        ? `${itemCount} ${itemCount === 1 ? "item" : "itens"} na cesta`
+        : "Nenhum produto adicionado";
+      basketEmpty.hidden = entries.length > 0;
+      basketItems.hidden = entries.length === 0;
+      basketTotals.hidden = entries.length === 0;
+      basketDisclaimer.hidden = entries.length === 0;
+      clearBasketButton.hidden = entries.length === 0;
+
+      if (entries.length === 0) {
+        basketItems.innerHTML = "";
+        basketTotals.innerHTML = "";
+        return;
+      }
+
+      basketItems.innerHTML = entries.map(([name, quantity]) => {
+        const product = products.find((item) => item.name === name);
+        if (!product) return "";
+        const productIndex = products.indexOf(product);
+        return `
+          <li class="basket-item">
+            <span class="basket-item-name">${escapeHTML(product.name)}<span class="basket-item-unit">${escapeHTML(product.unit)}</span></span>
+            <span class="basket-item-controls">
+              <label class="sr-only" for="quantity-${productIndex}">Quantidade de ${escapeHTML(product.name)}</label>
+              <input class="basket-quantity" id="quantity-${productIndex}" type="number" min="1" max="99" step="1" value="${quantity}" data-quantity-for="${productIndex}">
+              <button class="remove-basket-button" type="button" data-remove-product="${productIndex}" aria-label="Remover ${escapeHTML(product.name)} da cesta">Remover</button>
+            </span>
+          </li>`;
+      }).join("");
+
+      const totals = marketNames.map((market, marketIndex) => {
+        const cents = entries.reduce((total, [name, quantity]) => {
+          const product = products.find((item) => item.name === name);
+          if (!product) return total;
+          const offer = product.offers.find((item) =>
+            item.marketId ? item.marketId === remoteMarkets[marketIndex]?.id : item.market === market);
+          if (!offer) return null;
+          if (total === null) return null;
+          return total + Math.round(offer.price * 100) * quantity;
+        }, 0);
+        return { market, total: cents === null ? null : cents / 100 };
+      }).sort((a, b) => {
+        if (a.total === null) return 1;
+        if (b.total === null) return -1;
+        return a.total - b.total;
+      });
+      const lowestTotal = totals.find((item) => item.total !== null)?.total ?? null;
+
+      basketTotals.innerHTML = totals.map((item, index) => `
+        <div class="basket-total">
+          <span class="basket-total-name">${escapeHTML(item.market)}${item.total !== null && item.total === lowestTotal ? " · menor total" : ""}</span>
+          <strong class="basket-total-price">${item.total === null ? "Incompleto" : formatPrice(item.total)}</strong>
+          <span class="basket-total-note">${item.total === null ? "Falta preço de um ou mais itens" : item.total === lowestTotal ? "Menor total nesta comparação" : `${formatPrice(item.total - lowestTotal)} a mais que o menor total`}</span>
+        </div>`).join("");
+    }
+
+    function renderProducts() {
+      const query = searchInput.value.trim().toLocaleLowerCase("pt-BR");
+      const sortBy = sortSelect.value;
+      const visibleProducts = products
+        .filter((product) => activeCategory === "Todas" || product.category === activeCategory)
+        .filter((product) => `${product.name} ${product.brand} ${product.category}`.toLocaleLowerCase("pt-BR").includes(query))
+        .sort((a, b) => {
+          const aPrice = getPriceRange(a).cheapest?.price ?? Number.POSITIVE_INFINITY;
+          const bPrice = getPriceRange(b).cheapest?.price ?? Number.POSITIVE_INFINITY;
+          if (!Number.isFinite(aPrice) || !Number.isFinite(bPrice)) {
+            if (aPrice === bPrice) return a.name.localeCompare(b.name, "pt-BR");
+            return aPrice - bPrice;
+          }
+          if (sortBy === "price") return aPrice - bPrice;
+          if (sortBy === "name") return a.name.localeCompare(b.name, "pt-BR");
+          return getPriceRange(b).difference - getPriceRange(a).difference;
+        });
+
+      resultCount.textContent = `${visibleProducts.length} ${visibleProducts.length === 1 ? "produto encontrado" : "produtos encontrados"}`;
+
+      if (visibleProducts.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <h3>Nenhum produto encontrado</h3>
+            <p>Tente outro nome ou escolha uma categoria diferente.</p>
+            <button class="clear-button" type="button" id="clear-search">Limpar busca</button>
+          </div>`;
+        document.querySelector("#clear-search").addEventListener("click", () => {
+          searchInput.value = "";
+          activeCategory = "Todas";
+          document.querySelectorAll(".filter-chip").forEach((chip) => {
+            chip.setAttribute("aria-pressed", String(chip.dataset.category === "Todas"));
+          });
+          renderProducts();
+          searchInput.focus();
+        });
+        return;
+      }
+
+      grid.innerHTML = visibleProducts.map((product) => {
+        const { cheapest, difference } = getPriceRange(product);
+        const sortedOffers = product.offers
+          .map((offer, originalIndex) => ({ ...offer, originalIndex }))
+          .sort((a, b) => a.price - b.price);
+        const productIndex = products.indexOf(product);
+        const quantityInBasket = basket.get(product.name) || 0;
+        const cheapestIsSimulated = cheapest?.source === "Simulação";
+        return `
+          <article class="product-card">
+            <div class="product-top">
+              <div style="display:flex;gap:12px;min-width:0">
+                <span class="product-emoji" aria-hidden="true">${escapeHTML(product.emoji)}</span>
+                <div>
+                  <span class="category-label">${escapeHTML(product.category)}</span>
+                  <h3 class="product-name">${escapeHTML(product.name)}</h3>
+                  <p class="unit">Marca ${escapeHTML(product.brand || "não informada")} · ${escapeHTML(product.unit)}</p>
+                </div>
+              </div>
+              <span class="best-badge">${!cheapest ? "SEM PREÇO" : cheapestIsSimulated ? "SIMULADO" : "MENOR PREÇO"}</span>
+            </div>
+            <div class="price-row">
+              <span class="price">${cheapest ? formatPrice(cheapest.price) : "—"}</span>
+              <span class="market">${cheapest ? `${cheapestIsSimulated ? "Menor preço simulado" : "Menor preço"}<br>${escapeHTML(cheapest.market)}` : "Nenhum preço informado"}</span>
+            </div>
+            <p class="offer-heading">Comparação em ${product.offers.length} ${product.offers.length === 1 ? "mercado" : "mercados"}</p>
+            <div class="offer-list">
+              ${sortedOffers.length === 0 ? '<p class="subheading">Aguardando preços dos mercados.</p>' : ""}
+              ${sortedOffers.map((offer) => `
+                <div class="offer-item ${offer.price === cheapest.price ? "offer-item-best" : ""}">
+                  <span>${escapeHTML(offer.market)}${offer.price === cheapest.price ? ` · menor preço${offer.source === "Simulação" ? " simulado" : ""}` : ""}</span>
+                  <span class="offer-price">${formatPrice(offer.price)}</span>
+                  <span class="offer-meta">Origem: ${escapeHTML(offer.source)} · Consultado em: ${escapeHTML(formatDate(offer.date))}</span>
+                  <button class="report-button" type="button" data-report-product="${productIndex}" data-report-offer="${offer.originalIndex}">Avisar sobre preço desatualizado</button>
+                </div>`).join("")}
+            </div>
+            <div class="card-footer">
+              <span>${cheapest ? "Diferença entre mercados" : "Produto disponível para receber preços"}</span>
+              <strong>${cheapest ? formatPrice(difference) : ""}</strong>
+            </div>
+            <button class="add-basket-button" type="button" data-add-product="${productIndex}" ${cheapest ? "" : "disabled"}>${!cheapest ? "Aguardando preços" : quantityInBasket ? `Na cesta (${quantityInBasket}) · adicionar mais` : "Adicionar à cesta"}</button>
+          </article>`;
+      }).join("");
+    }
+
+    grid.addEventListener("click", (event) => {
+      const addButton = event.target.closest("[data-add-product]");
+      if (addButton) {
+        const product = products[Number(addButton.dataset.addProduct)];
+        basket.set(product.name, (basket.get(product.name) || 0) + 1);
+        renderBasket();
+        renderProducts();
+        return;
+      }
+
+      const reportButton = event.target.closest("[data-report-product]");
+      if (reportButton) {
+        const product = products[Number(reportButton.dataset.reportProduct)];
+        const offer = product.offers[Number(reportButton.dataset.reportOffer)];
+        document.querySelector("#report-product").textContent =
+          `${product.name} · ${product.unit} · ${offer.market} · ${formatPrice(offer.price)}`;
+        document.querySelector("#report-description").textContent = offer.source === "Simulação"
+          ? "Este preço é fictício e faz parte da demonstração. Nenhum aviso foi enviado ou registrado."
+          : "Este protótipo ainda não envia avisos. Nenhum dado foi enviado ou registrado.";
+        document.querySelector("#report-dialog").showModal();
+      }
+    });
+
+    document.querySelector("#basket-items").addEventListener("change", (event) => {
+      const quantityInput = event.target.closest("[data-quantity-for]");
+      if (!quantityInput) return;
+      const product = products[Number(quantityInput.dataset.quantityFor)];
+      const quantity = Math.min(99, Math.max(1, Math.floor(Number(quantityInput.value) || 1)));
+      basket.set(product.name, quantity);
+      renderBasket();
+      renderProducts();
+    });
+
+    document.querySelector("#basket-items").addEventListener("click", (event) => {
+      const removeButton = event.target.closest("[data-remove-product]");
+      if (!removeButton) return;
+      const product = products[Number(removeButton.dataset.removeProduct)];
+      basket.delete(product.name);
+      renderBasket();
+      renderProducts();
+    });
+
+    document.querySelector("#clear-basket").addEventListener("click", () => {
+      basket.clear();
+      renderBasket();
+      renderProducts();
+    });
+
+    document.querySelector("#close-report").addEventListener("click", () => {
+      document.querySelector("#report-dialog").close();
+    });
+
+    cloudLoginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!cloudClient) return;
+      setCloudStatus("Entrando...");
+      try {
+        const { error } = await cloudClient.auth.signInWithPassword({
+          email: document.querySelector("#cloud-email").value.trim(),
+          password: document.querySelector("#cloud-password").value
+        });
+        if (error) throw error;
+        document.querySelector("#cloud-password").value = "";
+        setCloudStatus("Login realizado.");
+      } catch (error) {
+        console.error("O login do mercado falhou.", error);
+        setCloudStatus(`Não foi possível entrar: ${error.message || "verifique a conexão e as credenciais."}`, true);
+      }
+    });
+
+    document.querySelector("#cloud-create-account").addEventListener("click", async () => {
+      if (!cloudClient) return;
+      const email = document.querySelector("#cloud-email").value.trim();
+      const password = document.querySelector("#cloud-password").value;
+      if (!email || password.length < 6) {
+        setCloudStatus("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.", true);
+        return;
+      }
+
+      setCloudStatus("Criando conta...");
+      try {
+        const { data, error } = await cloudClient.auth.signUp({ email, password });
+        if (error) throw error;
+        if (data.session) {
+          await handleCloudSession(data.session);
+          setCloudStatus("Conta criada. Preencha o cadastro do mercado e aguarde a aprovação.");
+        } else {
+          setCloudStatus("Conta criada. Confirme o e-mail enviado pelo Supabase e depois entre para solicitar acesso ao mercado.");
+        }
+      } catch (error) {
+        console.error("Não foi possível criar a conta do mercado.", error);
+        setCloudStatus(`Não foi possível criar a conta: ${error.message || "verifique a conexão e se o cadastro por e-mail está habilitado."}`, true);
+      }
+    });
+
+    cloudApplicationForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!cloudClient || !cloudSession || cloudMembership) return;
+      const application = {
+        applicant_user_id: cloudSession.user.id,
+        market_name: document.querySelector("#application-market-name").value.trim(),
+        contact_name: document.querySelector("#application-contact-name").value.trim(),
+        contact_phone: document.querySelector("#application-phone").value.trim(),
+        status: "pending"
+      };
+      setCloudResult("cloud-application-result", "Enviando solicitação...");
+
+      try {
+        const { error } = await cloudClient.from("market_applications").insert(application);
+        if (error) throw error;
+        document.querySelector("#application-market-name").value = "";
+        document.querySelector("#application-contact-name").value = "";
+        document.querySelector("#application-phone").value = "";
+        setCloudResult("cloud-application-result", "Solicitação enviada. Aguarde a aprovação do administrador.");
+        setCloudStatus("Cadastro aguardando aprovação. Você não pode alterar preços ainda.");
+      } catch (error) {
+        console.error("Não foi possível enviar o cadastro do mercado.", error);
+        setCloudResult("cloud-application-result", `Não foi possível enviar: ${error.message || "verifique os dados e tente novamente."}`, true);
+      }
+    });
+
+    document.querySelector("#pending-applications-list").addEventListener("click", async (event) => {
+      if (cloudMembership?.role !== "admin") return;
+      const approveButton = event.target.closest("[data-approve-application]");
+      const rejectButton = event.target.closest("[data-reject-application]");
+      if (!approveButton && !rejectButton) return;
+      const applicationId = approveButton?.dataset.approveApplication || rejectButton?.dataset.rejectApplication;
+      const action = approveButton ? "approve_market_application" : "reject_market_application";
+      approveButton && (approveButton.disabled = true);
+      rejectButton && (rejectButton.disabled = true);
+      setCloudResult("cloud-approval-result", approveButton ? "Aprovando cadastro..." : "Rejeitando cadastro...");
+
+      try {
+        const { error } = await cloudClient.rpc(action, { application_id: applicationId });
+        if (error) throw error;
+        await handleCloudSession(cloudSession);
+        setCloudResult("cloud-approval-result", approveButton
+          ? "Mercado aprovado. A conta já pode cadastrar preços."
+          : "Cadastro rejeitado.");
+      } catch (error) {
+        console.error("Não foi possível revisar o cadastro do mercado.", error);
+        setCloudResult("cloud-approval-result", `Falha ao revisar cadastro: ${error.message || "tente novamente."}`, true);
+        if (approveButton) approveButton.disabled = false;
+        if (rejectButton) rejectButton.disabled = false;
+      }
+    });
+
+    document.querySelector("#cloud-create-account").addEventListener("click", async () => {
+      if (!cloudClient) return;
+      const email = document.querySelector("#cloud-email").value.trim();
+      const password = document.querySelector("#cloud-password").value;
+      if (!email || password.length < 6) {
+        setCloudStatus("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.", true);
+        return;
+      }
+
+      setCloudStatus("Criando conta...");
+      try {
+        const { data, error } = await cloudClient.auth.signUp({ email, password });
+        if (error) throw error;
+        if (data.session) {
+          await handleCloudSession(data.session);
+          setCloudStatus("Conta criada. Preencha o cadastro do mercado e aguarde a aprovação.");
+        } else {
+          setCloudStatus("Conta criada. Confirme o e-mail enviado pelo Supabase e depois entre para solicitar acesso ao mercado.");
+        }
+      } catch (error) {
+        console.error("Não foi possível criar a conta do mercado.", error);
+        setCloudStatus(`Não foi possível criar a conta: ${error.message || "verifique a conexão e se o cadastro por e-mail está habilitado."}`, true);
+      }
+    });
+
+    cloudApplicationForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!cloudClient || !cloudSession || cloudMembership) return;
+      const application = {
+        applicant_user_id: cloudSession.user.id,
+        contact_email: cloudSession.user.email,
+        market_name: document.querySelector("#application-market-name").value.trim(),
+        contact_name: document.querySelector("#application-contact-name").value.trim(),
+        contact_phone: document.querySelector("#application-phone").value.trim(),
+        status: "pending"
+      };
+      setCloudResult("cloud-application-result", "Enviando solicitação...");
+
+      try {
+        const { error } = await cloudClient.from("market_applications").insert(application);
+        if (error) throw error;
+        document.querySelector("#application-market-name").value = "";
+        document.querySelector("#application-contact-name").value = "";
+        document.querySelector("#application-phone").value = "";
+        setCloudResult("cloud-application-result", "Solicitação enviada. Aguarde a aprovação do administrador.");
+        setCloudStatus("Cadastro aguardando aprovação. Você não pode alterar preços ainda.");
+      } catch (error) {
+        console.error("Não foi possível enviar o cadastro do mercado.", error);
+        setCloudResult("cloud-application-result", `Não foi possível enviar: ${error.message || "verifique os dados e tente novamente."}`, true);
+      }
+    });
+
+    document.querySelector("#pending-applications-list").addEventListener("click", async (event) => {
+      if (cloudMembership?.role !== "admin") return;
+      const approveButton = event.target.closest("[data-approve-application]");
+      const rejectButton = event.target.closest("[data-reject-application]");
+      if (!approveButton && !rejectButton) return;
+      const applicationId = approveButton?.dataset.approveApplication || rejectButton?.dataset.rejectApplication;
+      const action = approveButton ? "approve_market_application" : "reject_market_application";
+      if (approveButton) approveButton.disabled = true;
+      if (rejectButton) rejectButton.disabled = true;
+      setCloudResult("cloud-approval-result", approveButton ? "Aprovando cadastro..." : "Rejeitando cadastro...");
+
+      try {
+        const { error } = await cloudClient.rpc(action, { application_id: applicationId });
+        if (error) throw error;
+        await handleCloudSession(cloudSession);
+        setCloudResult("cloud-approval-result", approveButton
+          ? "Mercado aprovado. A conta já pode cadastrar preços."
+          : "Cadastro rejeitado.");
+      } catch (error) {
+        console.error("Não foi possível revisar o cadastro do mercado.", error);
+        setCloudResult("cloud-approval-result", `Falha ao revisar cadastro: ${error.message || "tente novamente."}`, true);
+        if (approveButton) approveButton.disabled = false;
+        if (rejectButton) rejectButton.disabled = false;
+      }
+    });
+
+    document.querySelector("#cloud-logout").addEventListener("click", async () => {
+      if (!cloudClient) return;
+      try {
+        const { error } = await cloudClient.auth.signOut();
+        if (error) throw error;
+      } catch (error) {
+        console.error("Não foi possível encerrar a sessão do mercado.", error);
+        setCloudStatus(`Não foi possível sair: ${error.message || "tente novamente."}`, true);
+      }
+    });
+
+    cloudProductForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!cloudClient || cloudMembership?.role !== "admin") return;
+      setCloudResult("cloud-product-result", "Cadastrando produto...");
+      const product = {
+        name: document.querySelector("#cloud-product-name").value.trim(),
+        brand: document.querySelector("#cloud-product-brand").value.trim(),
+        unit: document.querySelector("#cloud-product-unit").value.trim(),
+        category: document.querySelector("#cloud-product-category").value,
+        emoji: "🛒",
+        active: true
+      };
+
+      try {
+        const { data, error } = await cloudClient
+          .from("products")
+          .insert(product)
+          .select("id")
+          .single();
+        if (error) throw error;
+
+        const catalogRefreshed = await refreshRemoteCatalog();
+        document.querySelector("#cloud-price-product").value = data.id;
+        loadRemotePriceIntoForm();
+        cloudProductForm.reset();
+        setCloudResult("cloud-product-result", catalogRefreshed
+          ? `“${product.name}” adicionado ao catálogo compartilhado.`
+          : `“${product.name}” foi salvo, mas a lista não pôde ser atualizada. Recarregue o catálogo.`);
+      } catch (error) {
+        console.error("Não foi possível cadastrar o produto no catálogo online.", error);
+        setCloudResult("cloud-product-result", `Falha ao cadastrar: ${error.message || "verifique a conexão e o acesso de administrador."}`, true);
+      }
+    });
+
+    cloudPriceForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!cloudClient || !cloudMembership) return;
+      const productId = document.querySelector("#cloud-price-product").value;
+      const marketId = cloudMembership.role === "admin"
+        ? document.querySelector("#cloud-price-market").value
+        : cloudMembership.market_id;
+      const price = Number(document.querySelector("#cloud-price-value").value);
+      const observedOn = document.querySelector("#cloud-price-date").value;
+
+      if (!productId || !marketId || !Number.isFinite(price) || price <= 0 || !observedOn) {
+        setCloudResult("cloud-price-result", "Selecione produto e mercado e informe preço e data válidos.", true);
+        return;
+      }
+
+      setCloudResult("cloud-price-result", "Salvando no catálogo compartilhado...");
+      try {
+        const { error } = await cloudClient
+          .from("prices")
+          .upsert({
+            product_id: productId,
+            market_id: marketId,
+            price,
+            observed_on: observedOn,
+            source: "Informado pelo mercado",
+            updated_by: cloudSession.user.id,
+            updated_at: new Date().toISOString()
+          }, { onConflict: "product_id,market_id" });
+        if (error) throw error;
+
+        const catalogRefreshed = await refreshRemoteCatalog();
+        setCloudResult("cloud-price-result", catalogRefreshed
+          ? "Preço salvo e publicado para os visitantes."
+          : "Preço salvo, mas o catálogo não atualizou. Recarregue a página para confirmar.");
+      } catch (error) {
+        console.error("Não foi possível salvar o preço online.", error);
+        setCloudResult("cloud-price-result", `Falha ao salvar: ${error.message || "verifique a conexão e as permissões no banco."}`, true);
+      }
+    });
+
+    document.querySelector("#cloud-price-product").addEventListener("change", loadRemotePriceIntoForm);
+    document.querySelector("#cloud-price-market").addEventListener("change", loadRemotePriceIntoForm);
+
+    productSelect.addEventListener("change", loadProductIntoForm);
+
+    entryForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const selectedValue = productSelect.value;
+      const selectedIndex = selectedValue === "__new__" ? -1 : Number(selectedValue);
+      const existingProduct = selectedIndex >= 0 ? products[selectedIndex] : null;
+      const name = document.querySelector("#entry-name").value.trim();
+      const brand = document.querySelector("#entry-brand").value.trim() || "Não informada";
+      const unit = document.querySelector("#entry-unit").value.trim();
+      const category = document.querySelector("#entry-category").value;
+      const date = document.querySelector("#entry-date").value;
+      const source = document.querySelector("#entry-source").value;
+      const nextMarketNames = [0, 1, 2].map((index) =>
+        document.querySelector(`#market-name-${index}`).value.trim());
+      const prices = [0, 1, 2].map((index) =>
+        Number(document.querySelector(`#market-price-${index}`).value));
+
+      if (!name || !unit || !date || nextMarketNames.some((market) => !market)) {
+        setAdminStatus("Preencha o nome, a embalagem, a data e os três mercados.", true);
+        return;
+      }
+      if (new Set(nextMarketNames.map((market) => market.toLocaleLowerCase("pt-BR"))).size !== 3) {
+        setAdminStatus("Informe nomes diferentes para os três mercados.", true);
+        return;
+      }
+      if (prices.some((price) => !Number.isFinite(price) || price <= 0)) {
+        setAdminStatus("Informe um preço maior que zero para cada mercado.", true);
+        return;
+      }
+      if (selectedIndex < 0 && products.some((product) =>
+        product.name.toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"))) {
+        setAdminStatus("Esse produto já existe. Selecione-o na lista para atualizar seus dados.", true);
+        return;
+      }
+      if (existingProduct && products.some((product, index) =>
+        index !== selectedIndex
+        && product.name.toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"))) {
+        setAdminStatus("Outro produto já usa esse nome. Escolha um nome diferente.", true);
+        return;
+      }
+
+      const updatedProduct = {
+        name,
+        brand,
+        unit,
+        category,
+        emoji: existingProduct?.emoji || "🛒",
+        offers: prices.map((price, index) => ({
+          market: nextMarketNames[index],
+          price,
+          date,
+          source
+        }))
+      };
+      const nextProducts = products.map((product) => ({
+        ...product,
+        offers: product.offers.map((offer, index) => ({
+          ...offer,
+          market: nextMarketNames[index]
+        }))
+      }));
+
+      if (selectedIndex >= 0) {
+        nextProducts[selectedIndex] = updatedProduct;
+      } else {
+        nextProducts.push(updatedProduct);
+      }
+
+      if (!persistData(nextProducts, nextMarketNames)) return;
+
+      if (existingProduct && existingProduct.name !== name && basket.has(existingProduct.name)) {
+        const quantity = basket.get(existingProduct.name);
+        basket.delete(existingProduct.name);
+        basket.set(name, (basket.get(name) || 0) + quantity);
+      }
+
+      products = nextProducts;
+      marketNames = nextMarketNames;
+      updateDisclosure();
+      renderBasket();
+      renderProducts();
+      renderProductOptions(selectedIndex >= 0 ? String(selectedIndex) : "__new__");
+      loadProductIntoForm();
+      setAdminStatus(`“${name}” salvo neste navegador. Esses dados ainda não foram publicados para outros visitantes.`);
+    });
+
+    document.querySelector("#reset-demo").addEventListener("click", () => {
+      if (!window.confirm("Restaurar a demonstração remove os dados cadastrados neste navegador. Deseja continuar?")) return;
+      try {
+        localStorage.removeItem(storageKey);
+      } catch (error) {
+        console.error("Não foi possível remover os dados salvos do PreçoBaixo Picuí.", error);
+        setAdminStatus("Não foi possível restaurar a demonstração porque o navegador bloqueou o armazenamento.", true);
+        return;
+      }
+
+      products = createInitialProducts();
+      marketNames = [...initialMarketNames];
+      basket.clear();
+      updateDisclosure();
+      renderBasket();
+      renderProducts();
+      renderProductOptions("__new__");
+      loadProductIntoForm();
+      setAdminStatus("Demonstração restaurada. Os dados fictícios voltaram a ser exibidos.");
+    });
+
+    document.querySelector("#search-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      renderProducts();
+      document.querySelector("#products-section").scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start"
+      });
+    });
+    searchInput.addEventListener("input", renderProducts);
+    sortSelect.addEventListener("change", renderProducts);
+    document.querySelector("#filters").addEventListener("click", (event) => {
+      const chip = event.target.closest(".filter-chip");
+      if (!chip) return;
+      activeCategory = chip.dataset.category;
+      document.querySelectorAll(".filter-chip").forEach((item) => {
+        item.setAttribute("aria-pressed", String(item === chip));
+      });
+      renderProducts();
+    });
+
+    const installAppButton = document.querySelector("#install-app");
+    let installPromptEvent = null;
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      installPromptEvent = event;
+      installAppButton.hidden = false;
+    });
+
+    installAppButton.addEventListener("click", async () => {
+      if (!installPromptEvent) return;
+      await installPromptEvent.prompt();
+      const { outcome } = await installPromptEvent.userChoice;
+      if (outcome === "accepted") installAppButton.hidden = true;
+      installPromptEvent = null;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      installPromptEvent = null;
+      installAppButton.hidden = true;
+    });
+
+    if ("serviceWorker" in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+        console.error("Não foi possível registrar o suporte de instalação do PreçoBaixo Picuí.", error);
+      });
+    }
+
+    if (isCloudConfigured()) {
+      remoteMode = true;
+      document.querySelector("#local-admin-panel").hidden = true;
+      initializeCloud();
+    } else {
+      loadSavedData();
+      renderProductOptions("__new__");
+      loadProductIntoForm();
+      updateDisclosure();
+      renderBasket();
+      renderProducts();
+      setCloudStatus("O Supabase ainda não está conectado. Configure a URL e a chave pública do projeto no código para ativar login e catálogo compartilhado.");
+    }
+  </script>
+</body>
+</html>
